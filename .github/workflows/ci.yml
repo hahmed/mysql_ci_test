@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: myapp_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+
+      - name: Set up MySQL
+        run: |
+          sudo apt-get install libmysqlclient-dev
+
+      - name: Grant user privileges
+        run: |
+          mysql -h localhost -P 3306 -u root -ppassword -e "GRANT ALL PRIVILEGES ON myapp_test.* TO 'rails'@'%' WITH GRANT OPTION;"
+
+      - name: Bundle install
+        run: bundle install --jobs 4 --retry 3
+
+      - name: Database setup
+        run: |
+          bundle exec rake db:create
+          bundle exec rake db:schema:load
+
+      - name: Run tests
+        run: bundle exec rake test
