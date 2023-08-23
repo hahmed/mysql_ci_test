@@ -36,7 +36,7 @@ jobs:
 
       - name: Grant user privileges
         run: |
-          mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE USER 'rails'@'%'; GRANT ALL PRIVILEGES ON *.* TO 'rails'@'%' WITH GRANT OPTION;"
+          mysql -h 127.0.0.1 -P 3306 -u root -e "CREATE USER 'rails'@'%'; CREATE DATABASE mysql_ci_test_development; GRANT ALL PRIVILEGES ON *.* TO 'rails'@'%' WITH GRANT OPTION;"
 
       - name: Bundle install
         run: bundle install --jobs 4 --retry 3
