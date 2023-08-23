@@ -26,6 +26,7 @@ development:
 test:
   <<: *default
   database: mysql_ci_test_test
+  username: rails
   password: password
   host: localhost
   port: 3306
